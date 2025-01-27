@@ -1,4 +1,6 @@
 import express, { json, urlencoded } from "express";
+import userModel from "./Public/Models/User.js";
+import connection from "./Config/db.js";
 
 const app = express();
 
@@ -6,7 +8,7 @@ app.set("view engine", "ejs");
 
 //building a MiddleWare
 
-//middleware are of three type (inbuild, custom ,thirdparty middleware) this is custom middleware
+//middleware are of three type (inbuild, custom, thirdparty middleware) this is custom middleware
 // app.use((res, resp, next) => {
 //   console.log("This is a MiddleWare");
 //   next();
@@ -40,4 +42,47 @@ app.post("/formData", (req, res) => {
 
   res.send("Data Recieved");
 });
+
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+// CRUD Operation
+app.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  //create operation
+  await userModel.create({
+    username: name,
+    email: email,
+    password: password,
+  });
+  res.send("User Registered successfully");
+});
+
+//Read operation
+app.get("/getuser", (req, res) => {
+  userModel.find().then((user) => res.send(user));
+});
+app.get("/getuser/:name", (req, res) => {
+  userModel.find({ username: req.params.name }).then((user) => res.send(user));
+});
+//findone() this function is use to fetch only one user irrespective to how many user with same value is there it return the first user matches.
+
+//Update Operation
+//method findoneandupdate() this method is use to update the value according to the contition
+app.get("/updateEmail", async (req, res) => {
+  await userModel.findOneAndUpdate(
+    { username: "harsh" },
+    { email: "harsh@gmail.com" }
+  );
+
+  res.send("value updated successfully");
+
+  //here first {} contain the condition where we want to make a update and second {} contain the updated value which we want to update
+});
+
+//Delete Operation
+//here method findoneanddelete({}) is use to delete a specific user according to the condition given in {}
+
 app.listen(3000);
